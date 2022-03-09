@@ -45,63 +45,75 @@ namespace Celulares.Controllers
         // PUT: api/Telefonos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTelefono(int id, Telefono telefono)
+        public async Task<IActionResult> PutTelefonos(int id, Telefono telefono)
         {
+
             if (id != telefono.TelefonoId)
             {
                 return BadRequest();
             }
 
+            // La variable telefono tendrá la información que recibimos por PUT
+            // La variable tel tendrá la info original de la vivienda con el id recibido
+
+            var tel = await _context.Telefono.FindAsync(id);
+
+            // Borraremos los sensores de los telefonos para reemplazarlos con los recibidos
+
+            if (tel.Sensores != null)
+            {
+                tel.Sensores.Clear();
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Esto es importante porque tenemos que avisarle a EF
+            // que aquí termina una transacción y comienza otra
+            _context.ChangeTracker.Clear();
+
+
+            // Agregamos a la info de la vivienda los nuevos propietarios
+            if (telefono.SensoresList != null)
+            {
+                foreach (var telId in telefono.SensoresList)
+                {
+                    var sensor = await _context.Sensor.FindAsync(telId);
+                    if (sensor != null)
+                    {
+                        telefono.Sensores.Add(sensor);
+                    }
+                }
+            }
+
+            // Avisamos que hemos modificado la vivienda para que EF tome los cambios al guardar
             _context.Entry(telefono).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TelefonoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
-            return NoContent();
+            // Si llegamos aquí es porque todo salió bien
+            // devolvemos OK (http 200) y los datos de la vivienda
+            return Ok(telefono);
         }
 
-        //// POST: api/Telefonos
-        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Telefono>> PostTelefonso(Telefono telefono)
-        //{
-        //    _context.Telefono.Add(telefono);
-        //    await _context.SaveChangesAsync();
 
-        //    return CreatedAtAction("GetTelefono", new { id = telefono.TelefonoId }, telefono);
-        //}
-
-        // POST: api/Viviendas
+        // POST: api/Telefonos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Telefono>> PostTelefono(Telefono telefono)
         {
-            // A cada uno de los propietarios recibidos lo agregamos a la vivienda
+            // A cada uno de los sensores recibidos lo agregamos al telefono
             foreach (var item in telefono.SensoresList)
             {
                 Sensor s = await _context.Sensor.FindAsync(item);
                 telefono.Sensores.Add(s);
             }
 
-            // Agregamos la vivienda con toda su info a la base de datos
+            // Agregamos el telefono con toda su info a la base de datos
             _context.Telefono.Add(telefono);
             await _context.SaveChangesAsync();
 
-            // Devolvemos CREATED con la vivienda generada
-            return CreatedAtAction("GetVivienda", new { id = telefono.TelefonoId }, telefono);
+            // Devolvemos CREATED con el telefono generado
+            return CreatedAtAction("GetTelefono", new { id = telefono.TelefonoId }, telefono);
         }
 
         // DELETE: api/Telefonos/5
