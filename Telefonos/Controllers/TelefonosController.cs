@@ -10,7 +10,7 @@ using Telefonos.Models;
 
 namespace Celulares.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/1.0/[controller]")]
     [ApiController]
     public class TelefonosController : ControllerBase
     {
@@ -73,15 +73,35 @@ namespace Celulares.Controllers
             return NoContent();
         }
 
-        // POST: api/Telefonos
+        //// POST: api/Telefonos
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //public async Task<ActionResult<Telefono>> PostTelefonso(Telefono telefono)
+        //{
+        //    _context.Telefono.Add(telefono);
+        //    await _context.SaveChangesAsync();
+
+        //    return CreatedAtAction("GetTelefono", new { id = telefono.TelefonoId }, telefono);
+        //}
+
+        // POST: api/Viviendas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Telefono>> PostTelefono(Telefono telefono)
         {
+            // A cada uno de los propietarios recibidos lo agregamos a la vivienda
+            foreach (var item in telefono.SensoresList)
+            {
+                Sensor s = await _context.Sensor.FindAsync(item);
+                telefono.Sensores.Add(s);
+            }
+
+            // Agregamos la vivienda con toda su info a la base de datos
             _context.Telefono.Add(telefono);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTelefono", new { id = telefono.TelefonoId }, telefono);
+            // Devolvemos CREATED con la vivienda generada
+            return CreatedAtAction("GetVivienda", new { id = telefono.TelefonoId }, telefono);
         }
 
         // DELETE: api/Telefonos/5

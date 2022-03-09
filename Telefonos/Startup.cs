@@ -30,11 +30,12 @@ namespace Telefonos
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers().AddNewtonsoftJson(options =>
+            services.AddControllers().
+                AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
 
-            services.AddDbContext<CelularesContext>(opt => opt.UseMySQL("server=localhost;database=telefonos;user=root;password=123456"));
+            services.AddDbContext<CelularesContext>(opt => opt.UseMySQL("server=localhost;port=3306;database=telefonos;user=root;password=123456"));
         }
 
 
