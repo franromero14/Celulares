@@ -42,6 +42,112 @@ namespace Celulares.Controllers
             return telefono;
         }
 
+        // GET: api/Telefonos/Sensores
+        [HttpGet("Sensores")]
+        public dynamic Buscar(int Id)
+        {
+            var test = _context.Telefono 
+                .Where(item =>
+                    item.TelefonoId == Id
+                )
+                .Select(item => new
+                {
+                    item.Marca,
+                    item.Modelo,
+                    sensores = item.Sensores.AsQueryable()
+                    .Select(e => new
+                    {
+                        e.Nombre
+                    }).ToList()
+                }).ToList();
+
+            return test;
+        }
+
+        [HttpGet("ListarSensores")]
+        public dynamic Listar(int Id)
+        {
+            var test = _context.Telefono
+
+                .Select(item => new
+                {
+                    item.Marca,
+                    item.Modelo,
+                    sensores = item.Sensores.AsQueryable()
+                    .Select(e => new
+                    {
+                        e.Nombre
+                    }).ToList()
+                }).ToList();
+
+            return test;
+        }
+
+        [HttpGet("test3")]
+        public dynamic Test3(int Id)
+        {
+            var test = _context.Instalacion
+                .Where(item => item.TelefonoId == Id && item.Exitosa == true)
+                .Select(e => new
+                {
+                    Aplicacion = e.App.Nombre,
+                    NombreOperario = e.Operario.Nombre,
+                    ApellidoOperario = e.Operario.Apellido
+                });
+            return test;
+        }
+
+        [HttpGet("test4")]
+        public dynamic Test4(bool flag)
+        {
+            var test = _context.Instalacion
+                .Where(item => item.Exitosa == flag)
+                .Select(e => new
+                {
+                    IdEquipo = e.TelefonoId,
+                    Marca = e.Telefono.Marca,
+                    Modelo = e.Telefono.Modelo,
+                    Aplicacion = e.App.Nombre,
+                    NombreOperario = e.Operario.Nombre,
+                    ApellidoOperario = e.Operario.Apellido
+                });
+            return test;
+        }
+
+        [HttpGet("test5")]
+        public dynamic Test5(int SensorId = 0, int AppId = 0)
+        {
+            var test = _context.Instalacion
+                .Where(item =>  (item.AppId == AppId || AppId == 0) && (item.Exitosa == true))
+                .Select(e => new
+                {
+                    IdEquipo = e.TelefonoId,
+                    Marca = e.Telefono.Marca,
+                    Modelo = e.Telefono.Modelo,
+                    Aplicacion = e.App.Nombre
+                });
+            return test;
+        }
+
+        [HttpGet("FiltrarSensores")]
+        public dynamic Filtrar(int SensorId)
+        {
+            var test = _context.Telefono
+
+                .Select(item => new
+                {
+                    item.Marca,
+                    item.Modelo,
+                    sensores = item.Sensores.AsQueryable()
+                    .Select(e => new
+                    {
+                        e.Nombre
+                    }).ToList()
+                }).ToList();
+
+            return test;
+        }
+
         // PUT: api/Telefonos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
