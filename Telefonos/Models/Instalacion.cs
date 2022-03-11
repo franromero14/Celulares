@@ -23,7 +23,7 @@ namespace Celulares.Models
 
         public bool Exitosa { get; set; }
 
-        public string Fecha { get; set; }
+        public DateTime Fecha { get; set; }
 
     }
 }

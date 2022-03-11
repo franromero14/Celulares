@@ -78,7 +78,27 @@ namespace Celulares.Controllers
                     {
                         e.Nombre
                     }).ToList()
-                }).ToList();
+                });
+
+            return test;
+        }
+
+        [HttpGet("test2")]
+        public dynamic Test2(int Id)
+        {
+            var test = _context.Telefono
+
+                .Select(item => new
+                {
+                    item.Marca,
+                    item.Modelo,
+                    sensores = item.Sensores.AsQueryable()
+                    .Select(e => new
+                    {
+                        e.Nombre
+                    }).ToList()
+                    
+                });
 
             return test;
         }
@@ -115,16 +135,50 @@ namespace Celulares.Controllers
         }
 
         [HttpGet("test5")]
-        public dynamic Test5(int SensorId = 0, int AppId = 0)
+        public dynamic Test5(string Sensor)
+        {
+            var test = _context.Telefono
+                .Where(item => item.Sensores.Any(e => e.Nombre == Sensor))
+                .Select(e => new
+                {
+                    IdEquipo = e.TelefonoId,
+                    Marca = e.Marca,
+                    Modelo = e.Modelo
+                }).Distinct();
+            return test;
+        }
+
+        [HttpGet("test7")]
+        public dynamic Test7(int AppId)
         {
             var test = _context.Instalacion
-                .Where(item =>  (item.AppId == AppId || AppId == 0) && (item.Exitosa == true))
+                .Where(item => (item.AppId == AppId))
                 .Select(e => new
                 {
                     IdEquipo = e.TelefonoId,
                     Marca = e.Telefono.Marca,
-                    Modelo = e.Telefono.Modelo,
-                    Aplicacion = e.App.Nombre
+                    Modelo = e.Telefono.Modelo
+                });
+            return test;
+        }
+
+        [HttpGet("test6")]
+        public dynamic Test6()
+        {
+            var test = _context.Instalacion
+                .Where(p => p.Exitosa == true)
+                .GroupBy(q => new
+                {
+                    q.Fecha.Date,
+                    q.OperarioId
+                    
+                })
+                .Select(e => new
+                {   
+                    e.Key.OperarioId,
+                    fecha = e.Key.Date,
+                    cantidad = e.Count()
+                    
                 });
             return test;
         }
